@@ -1,5 +1,4 @@
-# Compilador em Java com JFlex e Java CUP
-
+# Compilador FrontEnd - JFlex e Java CUP
 Este projeto implementa um compilador simples com analisador léxico e sintático, utilizando **JFlex** e **Java CUP**. O código-fonte é escrito em Java e processa arquivos `input.txt` para geração de tokens e análise sintática.
 
 ## Requisitos
