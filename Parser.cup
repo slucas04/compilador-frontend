@@ -1,0 +1,105 @@
+/* Parser.cup */
+import java_cup.runtime.*;
+import java.util.*;  // List, ArrayList
+
+/* ================= Scanner integration ================ */
+parser code {:
+    private Scanner s;
+    public Parser(Scanner s) { this.s = s; }
+:}
+
+scan with {: return s.next_token(); :}
+
+
+
+/* ================= Terminais ================= */
+terminal LT, GT, NE;
+terminal IF, ELSE, WHILE, RETURN;
+terminal String ID;
+terminal Integer INT_CONST;
+terminal Double FLOAT_CONST;
+terminal PLUS, MINUS, TIMES, DIVIDE;
+terminal EQ, ASSIGN;
+terminal SEMI, COMMA, LBRACE, RBRACE, LPAREN, RPAREN;
+terminal INT, FLOAT, VOID;  // tipos
+
+/* ================= Não-terminais e tipos ================= */
+non terminal String type;
+non terminal List<String> stmt_list;
+non terminal String statement;
+non terminal String expr;
+non terminal String program;
+non terminal String name;
+
+
+/* ================= Precedências ================= */
+precedence left PLUS, MINUS;
+precedence left TIMES, DIVIDE;
+precedence nonassoc GT, LT, NE;
+precedence right ELSE;
+
+
+/* ================= Símbolo Inicial ================= */
+start with stmt_list;
+
+/* ================= Gramática ================= */
+
+
+stmt_list ::=
+      /* vazio */          
+    {: RESULT = new ArrayList<String>(); :}
+  | stmt_list:lst statement:st  
+    {: lst.add(st); RESULT = lst; :}
+;
+
+/* Cada statement vira String */
+statement ::=
+    /* declaração: tipo nome = expr; */
+    type:ty ID:id ASSIGN expr:e SEMI
+      {: RESULT = ty + " " + id + " = " + e; :}
+
+  | /* atribuição */
+    ID:id ASSIGN expr:e SEMI
+      {: RESULT = id + " = " + e; :}
+
+  | /* bloco */
+    LBRACE stmt_list:blk RBRACE
+      {: RESULT = "{ " + blk + " }"; :}
+
+  | /* if-else */
+    IF LPAREN expr:e RPAREN statement:t ELSE statement:el
+      {: RESULT = "if(" + e + ") " + t + " else " + el; :}
+
+  | /* while */
+    WHILE LPAREN expr:e RPAREN statement:bd
+      {: RESULT = "while(" + e + ") " + bd; :}
+
+  | /* return */
+    RETURN expr:e SEMI
+      {: RESULT = "return " + e; :}
+;
+
+name ::= ID:n {: RESULT = n; :};
+
+
+/* Definição de tipos */
+type ::=
+    INT     {: RESULT = "int"; :}
+  | FLOAT   {: RESULT = "float"; :}
+  | VOID    {: RESULT = "void"; :}
+;
+
+/* Expressões */
+expr ::=
+    expr:e1 PLUS expr:e2   {: RESULT = "(" + e1 + " + " + e2 + ")"; :}
+  | expr:e1 MINUS expr:e2  {: RESULT = "(" + e1 + " - " + e2 + ")"; :}
+  | expr:e1 TIMES expr:e2  {: RESULT = "(" + e1 + " * " + e2 + ")"; :}
+  | expr:e1 DIVIDE expr:e2 {: RESULT = "(" + e1 + " / " + e2 + ")"; :}
+  | expr:e1 GT   expr:e2  {: RESULT = "(" + e1 + " > "  + e2 + ")"; :}
+  | expr:e1 LT   expr:e2  {: RESULT = "(" + e1 + " < "  + e2 + ")"; :}
+  | expr:e1 NE   expr:e2  {: RESULT = "(" + e1 + " != " + e2 + ")"; :}
+  | LPAREN expr:e RPAREN    {: RESULT = e; :}
+  | INT_CONST:i            {: RESULT = i.toString(); :}
+  | FLOAT_CONST:f          {: RESULT = f.toString(); :}
+  | ID:v                   {: RESULT = v; :}
+;

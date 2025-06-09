@@ -1,0 +1,11 @@
+x = 10;
+y = 3.14;
+if (x > y) { 
+    x = y;
+    } else { 
+    y = x;
+    }
+while (x != 0) { 
+    x = x - 1;
+    }
+return x;
